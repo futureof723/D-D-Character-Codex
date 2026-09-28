@@ -35,6 +35,10 @@ function getCharacterSummary(character) {
   )
 }
 
+function getUniqueOptions(characters, fieldName) {
+  return [...new Set(characters.map((character) => character[fieldName]).filter(Boolean))].sort()
+}
+
 function App() {
   const [characters, setCharacters] = useState(featuredCharacters)
   const [isLoading, setIsLoading] = useState(isSupabaseConfigured)
@@ -43,6 +47,23 @@ function App() {
       ? ''
       : 'Add your Supabase URL and anon key to .env to load database records.',
   )
+  const [searchTerm, setSearchTerm] = useState('')
+  const [classFilter, setClassFilter] = useState('all')
+  const [speciesFilter, setSpeciesFilter] = useState('all')
+
+  const classOptions = getUniqueOptions(characters, 'class')
+  const speciesOptions = getUniqueOptions(characters, 'species')
+  const normalizedSearchTerm = searchTerm.trim().toLowerCase()
+  const filteredCharacters = characters.filter((character) => {
+    const matchesSearch = character.name
+      .toLowerCase()
+      .includes(normalizedSearchTerm)
+    const matchesClass = classFilter === 'all' || character.class === classFilter
+    const matchesSpecies =
+      speciesFilter === 'all' || character.species === speciesFilter
+
+    return matchesSearch && matchesClass && matchesSpecies
+  })
 
   useEffect(() => {
     if (!isSupabaseConfigured) {
@@ -127,8 +148,8 @@ function App() {
             <h2>Characters in the Codex</h2>
             <p>
               This section now reads from Supabase when environment variables
-              are configured. Sample records remain visible while setup is in
-              progress.
+              are configured. Search by character name, or narrow the archive
+              by class and species.
             </p>
           </div>
 
@@ -138,8 +159,55 @@ function App() {
             {!isLoading && loadError}
           </div>
 
+          <form className="character-controls" aria-label="Character filters">
+            <label>
+              <span>Search by name</span>
+              <input
+                type="search"
+                value={searchTerm}
+                onChange={(event) => setSearchTerm(event.target.value)}
+                placeholder="Try Aelira or Bram"
+              />
+            </label>
+
+            <label>
+              <span>Class</span>
+              <select
+                value={classFilter}
+                onChange={(event) => setClassFilter(event.target.value)}
+              >
+                <option value="all">All classes</option>
+                {classOptions.map((className) => (
+                  <option value={className} key={className}>
+                    {className}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label>
+              <span>Species</span>
+              <select
+                value={speciesFilter}
+                onChange={(event) => setSpeciesFilter(event.target.value)}
+              >
+                <option value="all">All species</option>
+                {speciesOptions.map((species) => (
+                  <option value={species} key={species}>
+                    {species}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </form>
+
+          <p className="results-summary" aria-live="polite">
+            Showing {filteredCharacters.length} of {characters.length} character
+            records.
+          </p>
+
           <div className="character-grid">
-            {characters.map((character) => (
+            {filteredCharacters.map((character) => (
               <article className="character-card" key={character.name}>
                 <div className="portrait-placeholder" aria-hidden="true">
                   {character.name.charAt(0)}
@@ -155,6 +223,13 @@ function App() {
               </article>
             ))}
           </div>
+
+          {filteredCharacters.length === 0 && (
+            <div className="empty-state" role="status">
+              No characters match those filters. Try clearing the search or
+              choosing a different class or species.
+            </div>
+          )}
         </section>
 
         <section className="content-section form-preview" id="add-character">
