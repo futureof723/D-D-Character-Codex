@@ -112,7 +112,7 @@ Netlify settings:
 
 - Base directory: `dnd-character-codex`
 - Build command: `npm run build`
-- Publish directory: `dnd-character-codex/dist`
+- Publish directory: `dist`
 
 Add these environment variables in Netlify:
 
