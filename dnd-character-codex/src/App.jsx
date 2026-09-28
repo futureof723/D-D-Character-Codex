@@ -39,6 +39,10 @@ function getUniqueOptions(characters, fieldName) {
   return [...new Set(characters.map((character) => character[fieldName]).filter(Boolean))].sort()
 }
 
+function getDisplayValue(value) {
+  return value || 'Not recorded yet'
+}
+
 function App() {
   const [characters, setCharacters] = useState(featuredCharacters)
   const [isLoading, setIsLoading] = useState(isSupabaseConfigured)
@@ -50,6 +54,7 @@ function App() {
   const [searchTerm, setSearchTerm] = useState('')
   const [classFilter, setClassFilter] = useState('all')
   const [speciesFilter, setSpeciesFilter] = useState('all')
+  const [selectedCharacter, setSelectedCharacter] = useState(null)
 
   const classOptions = getUniqueOptions(characters, 'class')
   const speciesOptions = getUniqueOptions(characters, 'species')
@@ -136,7 +141,7 @@ function App() {
               </div>
               <div>
                 <dt>Current Stage</dt>
-                <dd>Supabase connection</dd>
+                <dd>Character details</dd>
               </div>
             </dl>
           </aside>
@@ -219,6 +224,13 @@ function App() {
                   </p>
                   <h3>{character.name}</h3>
                   <p>{character.summary || getCharacterSummary(character)}</p>
+                  <a
+                    className="text-button"
+                    href="#character-details"
+                    onClick={() => setSelectedCharacter(character)}
+                  >
+                    View Details
+                  </a>
                 </div>
               </article>
             ))}
@@ -228,6 +240,81 @@ function App() {
             <div className="empty-state" role="status">
               No characters match those filters. Try clearing the search or
               choosing a different class or species.
+            </div>
+          )}
+        </section>
+
+        <section className="content-section" id="character-details">
+          <div className="section-heading">
+            <p className="eyebrow">Profile Record</p>
+            <h2>Character Details</h2>
+            <p>
+              Select a character from the archive to view the full database
+              record for that profile.
+            </p>
+          </div>
+
+          {selectedCharacter ? (
+            <article className="detail-panel">
+              <div className="detail-portrait">
+                {selectedCharacter.image_url ? (
+                  <img
+                    src={selectedCharacter.image_url}
+                    alt={`${selectedCharacter.name} portrait`}
+                  />
+                ) : (
+                  <span aria-hidden="true">
+                    {selectedCharacter.name.charAt(0)}
+                  </span>
+                )}
+              </div>
+
+              <div className="detail-content">
+                <p className="card-kicker">
+                  {getDisplayValue(selectedCharacter.species)}{' '}
+                  {getDisplayValue(selectedCharacter.class)}
+                </p>
+                <h3>{selectedCharacter.name}</h3>
+                <p className="detail-biography">
+                  {getDisplayValue(selectedCharacter.biography)}
+                </p>
+
+                <dl className="detail-list">
+                  <div>
+                    <dt>Alignment</dt>
+                    <dd>{getDisplayValue(selectedCharacter.alignment)}</dd>
+                  </div>
+                  <div>
+                    <dt>Background</dt>
+                    <dd>{getDisplayValue(selectedCharacter.background)}</dd>
+                  </div>
+                  <div>
+                    <dt>Abilities</dt>
+                    <dd>{getDisplayValue(selectedCharacter.abilities)}</dd>
+                  </div>
+                  <div>
+                    <dt>Affiliation</dt>
+                    <dd>{getDisplayValue(selectedCharacter.affiliation)}</dd>
+                  </div>
+                  <div>
+                    <dt>Status</dt>
+                    <dd>{getDisplayValue(selectedCharacter.status)}</dd>
+                  </div>
+                  <div>
+                    <dt>Image URL</dt>
+                    <dd>{getDisplayValue(selectedCharacter.image_url)}</dd>
+                  </div>
+                  <div>
+                    <dt>Notes</dt>
+                    <dd>{getDisplayValue(selectedCharacter.notes)}</dd>
+                  </div>
+                </dl>
+              </div>
+            </article>
+          ) : (
+            <div className="empty-state" role="status">
+              No character selected yet. Choose View Details on any character
+              card to open a full profile record.
             </div>
           )}
         </section>

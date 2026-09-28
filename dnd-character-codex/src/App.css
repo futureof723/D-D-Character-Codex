@@ -18,7 +18,8 @@
 
 .brand,
 .main-nav a,
-.button {
+.button,
+.text-button {
   text-decoration: none;
 }
 
@@ -267,6 +268,20 @@ h3 {
   padding: 20px;
 }
 
+.text-button {
+  color: var(--deep-blue);
+  display: inline-flex;
+  font-weight: 800;
+  margin-top: 14px;
+}
+
+.text-button:hover,
+.text-button:focus-visible {
+  color: var(--red-wax);
+  outline: none;
+  text-decoration: underline;
+}
+
 .portrait-placeholder {
   align-items: center;
   background: var(--deep-blue);
@@ -279,6 +294,73 @@ h3 {
   height: 74px;
   justify-content: center;
   width: 74px;
+}
+
+.detail-panel {
+  background: rgba(255, 252, 239, 0.78);
+  border: 1px solid rgba(112, 75, 35, 0.24);
+  border-radius: 8px;
+  display: grid;
+  gap: 26px;
+  grid-template-columns: minmax(180px, 0.34fr) minmax(0, 1fr);
+  margin-top: 28px;
+  padding: clamp(20px, 4vw, 32px);
+}
+
+.detail-portrait {
+  align-items: center;
+  aspect-ratio: 1;
+  background: var(--deep-blue);
+  border: 4px solid var(--gold);
+  border-radius: 8px;
+  color: #fff8df;
+  display: flex;
+  font-family: var(--heading-font);
+  font-size: clamp(4rem, 12vw, 7rem);
+  justify-content: center;
+  overflow: hidden;
+  width: 100%;
+}
+
+.detail-portrait img {
+  height: 100%;
+  object-fit: cover;
+  width: 100%;
+}
+
+.detail-content h3 {
+  font-size: clamp(2rem, 5vw, 3.6rem);
+}
+
+.detail-biography {
+  color: var(--muted-ink);
+  font-size: 1.05rem;
+  line-height: 1.75;
+  margin: 16px 0 0;
+}
+
+.detail-list {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 24px 0 0;
+}
+
+.detail-list div {
+  border-top: 1px solid rgba(112, 75, 35, 0.22);
+  padding-top: 12px;
+}
+
+.detail-list dt {
+  color: var(--deep-blue);
+  font-weight: 800;
+}
+
+.detail-list dd {
+  color: var(--muted-ink);
+  line-height: 1.6;
+  margin: 4px 0 0;
+  overflow-wrap: anywhere;
 }
 
 .empty-state {
@@ -299,7 +381,9 @@ h3 {
   .site-header,
   .hero-section,
   .character-grid,
-  .character-controls {
+  .character-controls,
+  .detail-panel,
+  .detail-list {
     grid-template-columns: 1fr;
   }
 
