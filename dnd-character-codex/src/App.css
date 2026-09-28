@@ -156,16 +156,34 @@ h3 {
   color: #fff8df;
 }
 
+.primary-button:hover,
+.primary-button:focus-visible {
+  background: #23445f;
+  outline: 3px solid rgba(23, 44, 63, 0.22);
+}
+
 .secondary-button {
   background: transparent;
   border: 2px solid var(--gold);
   color: var(--ink);
 }
 
+.secondary-button:hover,
+.secondary-button:focus-visible {
+  background: rgba(212, 164, 75, 0.16);
+  outline: 3px solid rgba(212, 164, 75, 0.24);
+}
+
 .danger-button {
   background: var(--red-wax);
   border: 2px solid var(--red-wax);
   color: #fff8df;
+}
+
+.danger-button:hover,
+.danger-button:focus-visible {
+  background: #72261b;
+  outline: 3px solid rgba(140, 47, 33, 0.22);
 }
 
 .archive-note {

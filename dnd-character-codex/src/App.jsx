@@ -335,7 +335,7 @@ function App() {
               </div>
               <div>
                 <dt>Current Stage</dt>
-                <dd>Add character form</dd>
+                <dd>CRUD complete</dd>
               </div>
             </dl>
           </aside>
@@ -343,7 +343,7 @@ function App() {
 
         <section className="content-section" id="characters">
           <div className="section-heading">
-            <p className="eyebrow">Featured Records</p>
+            <p className="eyebrow">Archive Records</p>
             <h2>Characters in the Codex</h2>
             <p>
               This section now reads from Supabase when environment variables
