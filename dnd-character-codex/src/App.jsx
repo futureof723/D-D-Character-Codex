@@ -1,30 +1,73 @@
+import { useEffect, useState } from 'react'
 import './App.css'
+import { isSupabaseConfigured, supabase } from './services/supabaseClient'
 
 const featuredCharacters = [
   {
     name: 'Aelira Moonbrook',
     species: 'Half-Elf',
-    className: 'Ranger',
+    class: 'Ranger',
     summary:
       'A borderland scout who maps forgotten roads and keeps watch over ruined watchtowers.',
   },
   {
     name: 'Bram Ironvale',
     species: 'Dwarf',
-    className: 'Cleric',
+    class: 'Cleric',
     summary:
       'A traveling shrine-keeper carrying records of lost clans and battlefield oaths.',
   },
   {
     name: 'Nyx Emberquill',
     species: 'Tiefling',
-    className: 'Wizard',
+    class: 'Wizard',
     summary:
       'An archive mage who studies cursed manuscripts and catalogues magical anomalies.',
   },
 ]
 
+function getCharacterSummary(character) {
+  return (
+    character.biography ||
+    character.background ||
+    character.notes ||
+    'No description has been recorded for this character yet.'
+  )
+}
+
 function App() {
+  const [characters, setCharacters] = useState(featuredCharacters)
+  const [isLoading, setIsLoading] = useState(isSupabaseConfigured)
+  const [loadError, setLoadError] = useState(
+    isSupabaseConfigured
+      ? ''
+      : 'Add your Supabase URL and anon key to .env to load database records.',
+  )
+
+  useEffect(() => {
+    if (!isSupabaseConfigured) {
+      return
+    }
+
+    async function loadCharacters() {
+      const { data, error } = await supabase
+        .from('characters')
+        .select('*')
+        .order('created_at', { ascending: false })
+
+      if (error) {
+        setLoadError(error.message)
+      } else {
+        setCharacters(data.length > 0 ? data : featuredCharacters)
+        setLoadError('')
+      }
+
+      setIsLoading(false)
+    }
+
+    loadCharacters()
+  }, [])
+
   return (
     <div className="app-shell">
       <header className="site-header">
@@ -72,7 +115,7 @@ function App() {
               </div>
               <div>
                 <dt>Current Stage</dt>
-                <dd>Layout and navigation</dd>
+                <dd>Supabase connection</dd>
               </div>
             </dl>
           </aside>
@@ -83,23 +126,31 @@ function App() {
             <p className="eyebrow">Featured Records</p>
             <h2>Characters in the Codex</h2>
             <p>
-              These are placeholder entries for now. In the next stages, this
-              section will read real records from Supabase.
+              This section now reads from Supabase when environment variables
+              are configured. Sample records remain visible while setup is in
+              progress.
             </p>
           </div>
 
+          <div className="data-status" role="status">
+            {isLoading && 'Loading character records...'}
+            {!isLoading && !loadError && 'Showing records from Supabase.'}
+            {!isLoading && loadError}
+          </div>
+
           <div className="character-grid">
-            {featuredCharacters.map((character) => (
+            {characters.map((character) => (
               <article className="character-card" key={character.name}>
                 <div className="portrait-placeholder" aria-hidden="true">
                   {character.name.charAt(0)}
                 </div>
                 <div>
                   <p className="card-kicker">
-                    {character.species} {character.className}
+                    {character.species || 'Unknown Species'}{' '}
+                    {character.class || 'Unknown Class'}
                   </p>
                   <h3>{character.name}</h3>
-                  <p>{character.summary}</p>
+                  <p>{character.summary || getCharacterSummary(character)}</p>
                 </div>
               </article>
             ))}
