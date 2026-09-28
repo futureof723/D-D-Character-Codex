@@ -162,6 +162,12 @@ h3 {
   color: var(--ink);
 }
 
+.danger-button {
+  background: var(--red-wax);
+  border: 2px solid var(--red-wax);
+  color: #fff8df;
+}
+
 .archive-note {
   padding: 28px;
 }
@@ -348,6 +354,18 @@ h3 {
   margin: 16px 0 0;
 }
 
+.detail-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 22px;
+}
+
+.detail-actions .button:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
 .detail-list {
   display: grid;
   gap: 14px;
@@ -389,6 +407,13 @@ h3 {
   margin-top: 28px;
 }
 
+.edit-form {
+  background: rgba(23, 44, 63, 0.05);
+  border: 1px solid rgba(23, 44, 63, 0.14);
+  border-radius: 8px;
+  padding: 20px;
+}
+
 .character-form label {
   display: grid;
   gap: 8px;
@@ -400,6 +425,8 @@ h3 {
 
 .form-actions {
   display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
   justify-content: flex-start;
 }
 

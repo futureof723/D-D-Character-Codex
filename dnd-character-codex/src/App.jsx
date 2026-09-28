@@ -51,6 +51,22 @@ function getFriendlySaveError(errorMessage) {
   return errorMessage
 }
 
+function characterToForm(character) {
+  return {
+    name: character.name || '',
+    species: character.species || '',
+    class: character.class || '',
+    alignment: character.alignment || '',
+    background: character.background || '',
+    biography: character.biography || '',
+    abilities: character.abilities || '',
+    affiliation: character.affiliation || '',
+    status: character.status || '',
+    image_url: character.image_url || '',
+    notes: character.notes || '',
+  }
+}
+
 const emptyCharacterForm = {
   name: '',
   species: '',
@@ -81,6 +97,12 @@ function App() {
   const [formError, setFormError] = useState('')
   const [formSuccess, setFormSuccess] = useState('')
   const [isSaving, setIsSaving] = useState(false)
+  const [isEditing, setIsEditing] = useState(false)
+  const [editForm, setEditForm] = useState(emptyCharacterForm)
+  const [editError, setEditError] = useState('')
+  const [editSuccess, setEditSuccess] = useState('')
+  const [isUpdating, setIsUpdating] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   const classOptions = getUniqueOptions(characters, 'class')
   const speciesOptions = getUniqueOptions(characters, 'species')
@@ -125,6 +147,102 @@ function App() {
       ...currentForm,
       [fieldName]: value,
     }))
+  }
+
+  function updateEditForm(fieldName, value) {
+    setEditForm((currentForm) => ({
+      ...currentForm,
+      [fieldName]: value,
+    }))
+  }
+
+  function startEditing(character) {
+    setEditForm(characterToForm(character))
+    setEditError('')
+    setEditSuccess('')
+    setIsEditing(true)
+  }
+
+  async function handleUpdateCharacter(event) {
+    event.preventDefault()
+    setEditError('')
+    setEditSuccess('')
+
+    if (!selectedCharacter?.id) {
+      setEditError('Select a saved Supabase character before editing.')
+      return
+    }
+
+    const trimmedCharacter = Object.fromEntries(
+      Object.entries(editForm).map(([key, value]) => [key, value.trim()]),
+    )
+
+    if (!trimmedCharacter.name || !trimmedCharacter.species || !trimmedCharacter.class) {
+      setEditError('Name, species, and class are required.')
+      return
+    }
+
+    setIsUpdating(true)
+
+    const { data, error } = await supabase
+      .from('characters')
+      .update(trimmedCharacter)
+      .eq('id', selectedCharacter.id)
+      .select('*')
+      .single()
+
+    if (error) {
+      setEditError(getFriendlySaveError(error.message))
+    } else {
+      setCharacters((currentCharacters) =>
+        currentCharacters.map((character) =>
+          character.id === data.id ? data : character,
+        ),
+      )
+      setSelectedCharacter(data)
+      setEditSuccess(`${data.name} was updated.`)
+      setIsEditing(false)
+    }
+
+    setIsUpdating(false)
+  }
+
+  async function handleDeleteCharacter() {
+    setEditError('')
+    setEditSuccess('')
+
+    if (!selectedCharacter?.id) {
+      setEditError('Select a saved Supabase character before deleting.')
+      return
+    }
+
+    const confirmed = window.confirm(
+      `Delete ${selectedCharacter.name}? This cannot be undone.`,
+    )
+
+    if (!confirmed) {
+      return
+    }
+
+    setIsDeleting(true)
+
+    const { error } = await supabase
+      .from('characters')
+      .delete()
+      .eq('id', selectedCharacter.id)
+
+    if (error) {
+      setEditError(getFriendlySaveError(error.message))
+    } else {
+      setCharacters((currentCharacters) =>
+        currentCharacters.filter((character) => character.id !== selectedCharacter.id),
+      )
+      setSelectedCharacter(null)
+      setIsEditing(false)
+      setEditSuccess(`${selectedCharacter.name} was deleted.`)
+    }
+
+    setIsDeleting(false)
   }
 
   async function handleAddCharacter(event) {
@@ -355,36 +473,178 @@ function App() {
                   {getDisplayValue(selectedCharacter.biography)}
                 </p>
 
-                <dl className="detail-list">
-                  <div>
-                    <dt>Alignment</dt>
-                    <dd>{getDisplayValue(selectedCharacter.alignment)}</dd>
+                <div className="detail-actions">
+                  <button
+                    className="button secondary-button"
+                    type="button"
+                    onClick={() => startEditing(selectedCharacter)}
+                  >
+                    Edit Character
+                  </button>
+                  <button
+                    className="button danger-button"
+                    type="button"
+                    onClick={handleDeleteCharacter}
+                    disabled={isDeleting}
+                  >
+                    {isDeleting ? 'Deleting...' : 'Delete Character'}
+                  </button>
+                </div>
+
+                {editError && (
+                  <div className="form-message error-message" role="alert">
+                    {editError}
                   </div>
-                  <div>
-                    <dt>Background</dt>
-                    <dd>{getDisplayValue(selectedCharacter.background)}</dd>
+                )}
+
+                {editSuccess && (
+                  <div className="form-message success-message" role="status">
+                    {editSuccess}
                   </div>
-                  <div>
-                    <dt>Abilities</dt>
-                    <dd>{getDisplayValue(selectedCharacter.abilities)}</dd>
-                  </div>
-                  <div>
-                    <dt>Affiliation</dt>
-                    <dd>{getDisplayValue(selectedCharacter.affiliation)}</dd>
-                  </div>
-                  <div>
-                    <dt>Status</dt>
-                    <dd>{getDisplayValue(selectedCharacter.status)}</dd>
-                  </div>
-                  <div>
-                    <dt>Image URL</dt>
-                    <dd>{getDisplayValue(selectedCharacter.image_url)}</dd>
-                  </div>
-                  <div>
-                    <dt>Notes</dt>
-                    <dd>{getDisplayValue(selectedCharacter.notes)}</dd>
-                  </div>
-                </dl>
+                )}
+
+                {isEditing ? (
+                  <form className="character-form edit-form" onSubmit={handleUpdateCharacter}>
+                    <label>
+                      <span>Name *</span>
+                      <input
+                        value={editForm.name}
+                        onChange={(event) => updateEditForm('name', event.target.value)}
+                        required
+                      />
+                    </label>
+
+                    <label>
+                      <span>Species *</span>
+                      <input
+                        value={editForm.species}
+                        onChange={(event) => updateEditForm('species', event.target.value)}
+                        required
+                      />
+                    </label>
+
+                    <label>
+                      <span>Class *</span>
+                      <input
+                        value={editForm.class}
+                        onChange={(event) => updateEditForm('class', event.target.value)}
+                        required
+                      />
+                    </label>
+
+                    <label>
+                      <span>Alignment</span>
+                      <input
+                        value={editForm.alignment}
+                        onChange={(event) => updateEditForm('alignment', event.target.value)}
+                      />
+                    </label>
+
+                    <label>
+                      <span>Background</span>
+                      <input
+                        value={editForm.background}
+                        onChange={(event) => updateEditForm('background', event.target.value)}
+                      />
+                    </label>
+
+                    <label>
+                      <span>Affiliation</span>
+                      <input
+                        value={editForm.affiliation}
+                        onChange={(event) => updateEditForm('affiliation', event.target.value)}
+                      />
+                    </label>
+
+                    <label>
+                      <span>Status</span>
+                      <input
+                        value={editForm.status}
+                        onChange={(event) => updateEditForm('status', event.target.value)}
+                      />
+                    </label>
+
+                    <label>
+                      <span>Image URL</span>
+                      <input
+                        type="url"
+                        value={editForm.image_url}
+                        onChange={(event) => updateEditForm('image_url', event.target.value)}
+                      />
+                    </label>
+
+                    <label className="full-width-field">
+                      <span>Biography</span>
+                      <textarea
+                        value={editForm.biography}
+                        onChange={(event) => updateEditForm('biography', event.target.value)}
+                        rows="4"
+                      />
+                    </label>
+
+                    <label className="full-width-field">
+                      <span>Abilities</span>
+                      <textarea
+                        value={editForm.abilities}
+                        onChange={(event) => updateEditForm('abilities', event.target.value)}
+                        rows="3"
+                      />
+                    </label>
+
+                    <label className="full-width-field">
+                      <span>Notes</span>
+                      <textarea
+                        value={editForm.notes}
+                        onChange={(event) => updateEditForm('notes', event.target.value)}
+                        rows="3"
+                      />
+                    </label>
+
+                    <div className="form-actions full-width-field">
+                      <button className="button primary-button" type="submit" disabled={isUpdating}>
+                        {isUpdating ? 'Saving...' : 'Save Changes'}
+                      </button>
+                      <button
+                        className="button secondary-button"
+                        type="button"
+                        onClick={() => setIsEditing(false)}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </form>
+                ) : (
+                  <dl className="detail-list">
+                    <div>
+                      <dt>Alignment</dt>
+                      <dd>{getDisplayValue(selectedCharacter.alignment)}</dd>
+                    </div>
+                    <div>
+                      <dt>Background</dt>
+                      <dd>{getDisplayValue(selectedCharacter.background)}</dd>
+                    </div>
+                    <div>
+                      <dt>Abilities</dt>
+                      <dd>{getDisplayValue(selectedCharacter.abilities)}</dd>
+                    </div>
+                    <div>
+                      <dt>Affiliation</dt>
+                      <dd>{getDisplayValue(selectedCharacter.affiliation)}</dd>
+                    </div>
+                    <div>
+                      <dt>Status</dt>
+                      <dd>{getDisplayValue(selectedCharacter.status)}</dd>
+                    </div>
+                    <div>
+                      <dt>Image URL</dt>
+                      <dd>{getDisplayValue(selectedCharacter.image_url)}</dd>
+                    </div>
+                    <div>
+                      <dt>Notes</dt>
+                      <dd>{getDisplayValue(selectedCharacter.notes)}</dd>
+                    </div>
+                  </dl>
+                )}
               </div>
             </article>
           ) : (
