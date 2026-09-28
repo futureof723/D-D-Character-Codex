@@ -230,13 +230,16 @@ h3 {
   gap: 8px;
 }
 
-.character-controls span {
+.character-controls span,
+.character-form span {
   color: var(--deep-blue);
   font-weight: 800;
 }
 
 .character-controls input,
-.character-controls select {
+.character-controls select,
+.character-form input,
+.character-form textarea {
   background: rgba(255, 252, 239, 0.9);
   border: 2px solid rgba(112, 75, 35, 0.28);
   border-radius: 6px;
@@ -246,8 +249,14 @@ h3 {
   width: 100%;
 }
 
+.character-form textarea {
+  resize: vertical;
+}
+
 .character-controls input:focus,
-.character-controls select:focus {
+.character-controls select:focus,
+.character-form input:focus,
+.character-form textarea:focus {
   border-color: var(--deep-blue);
   outline: 3px solid rgba(23, 44, 63, 0.18);
 }
@@ -373,8 +382,48 @@ h3 {
   padding: 16px;
 }
 
-.form-preview {
-  border-style: dashed;
+.character-form {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 28px;
+}
+
+.character-form label {
+  display: grid;
+  gap: 8px;
+}
+
+.full-width-field {
+  grid-column: 1 / -1;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.form-actions .button:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.form-message {
+  border-radius: 6px;
+  font-weight: 800;
+  padding: 14px 16px;
+}
+
+.error-message {
+  background: rgba(140, 47, 33, 0.08);
+  border: 1px solid rgba(140, 47, 33, 0.22);
+  color: var(--red-wax);
+}
+
+.success-message {
+  background: rgba(23, 44, 63, 0.08);
+  border: 1px solid rgba(23, 44, 63, 0.18);
+  color: var(--deep-blue);
 }
 
 @media (max-width: 860px) {
@@ -383,7 +432,8 @@ h3 {
   .character-grid,
   .character-controls,
   .detail-panel,
-  .detail-list {
+  .detail-list,
+  .character-form {
     grid-template-columns: 1fr;
   }
 

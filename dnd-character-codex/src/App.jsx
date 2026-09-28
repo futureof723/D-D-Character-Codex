@@ -43,6 +43,28 @@ function getDisplayValue(value) {
   return value || 'Not recorded yet'
 }
 
+function getFriendlySaveError(errorMessage) {
+  if (errorMessage.includes('row-level security')) {
+    return 'Supabase blocked this save because write access is not enabled yet. Run the demo RLS policy SQL, then try again.'
+  }
+
+  return errorMessage
+}
+
+const emptyCharacterForm = {
+  name: '',
+  species: '',
+  class: '',
+  alignment: '',
+  background: '',
+  biography: '',
+  abilities: '',
+  affiliation: '',
+  status: '',
+  image_url: '',
+  notes: '',
+}
+
 function App() {
   const [characters, setCharacters] = useState(featuredCharacters)
   const [isLoading, setIsLoading] = useState(isSupabaseConfigured)
@@ -55,6 +77,10 @@ function App() {
   const [classFilter, setClassFilter] = useState('all')
   const [speciesFilter, setSpeciesFilter] = useState('all')
   const [selectedCharacter, setSelectedCharacter] = useState(null)
+  const [characterForm, setCharacterForm] = useState(emptyCharacterForm)
+  const [formError, setFormError] = useState('')
+  const [formSuccess, setFormSuccess] = useState('')
+  const [isSaving, setIsSaving] = useState(false)
 
   const classOptions = getUniqueOptions(characters, 'class')
   const speciesOptions = getUniqueOptions(characters, 'species')
@@ -93,6 +119,56 @@ function App() {
 
     loadCharacters()
   }, [])
+
+  function updateCharacterForm(fieldName, value) {
+    setCharacterForm((currentForm) => ({
+      ...currentForm,
+      [fieldName]: value,
+    }))
+  }
+
+  async function handleAddCharacter(event) {
+    event.preventDefault()
+    setFormError('')
+    setFormSuccess('')
+
+    if (!isSupabaseConfigured) {
+      setFormError('Supabase is not configured. Add your .env values first.')
+      return
+    }
+
+    const trimmedCharacter = Object.fromEntries(
+      Object.entries(characterForm).map(([key, value]) => [key, value.trim()]),
+    )
+
+    if (!trimmedCharacter.name || !trimmedCharacter.species || !trimmedCharacter.class) {
+      setFormError('Name, species, and class are required.')
+      return
+    }
+
+    setIsSaving(true)
+
+    const { data, error } = await supabase
+      .from('characters')
+      .insert(trimmedCharacter)
+      .select('*')
+      .single()
+
+    if (error) {
+      setFormError(getFriendlySaveError(error.message))
+    } else {
+      setCharacters((currentCharacters) => [data, ...currentCharacters])
+      setSelectedCharacter(data)
+      setSearchTerm('')
+      setClassFilter('all')
+      setSpeciesFilter('all')
+      setCharacterForm(emptyCharacterForm)
+      setFormSuccess(`${data.name} was added to the codex.`)
+      window.location.hash = 'character-details'
+    }
+
+    setIsSaving(false)
+  }
 
   return (
     <div className="app-shell">
@@ -141,7 +217,7 @@ function App() {
               </div>
               <div>
                 <dt>Current Stage</dt>
-                <dd>Character details</dd>
+                <dd>Add character form</dd>
               </div>
             </dl>
           </aside>
@@ -319,15 +395,141 @@ function App() {
           )}
         </section>
 
-        <section className="content-section form-preview" id="add-character">
+        <section className="content-section" id="add-character">
           <div className="section-heading">
-            <p className="eyebrow">Coming Next</p>
+            <p className="eyebrow">New Record</p>
             <h2>Add Character</h2>
             <p>
-              This area will become the character creation form once the
-              database connection is ready.
+              Add an original fantasy character to the Supabase database. Name,
+              species, and class are required.
             </p>
           </div>
+
+          <form className="character-form" onSubmit={handleAddCharacter}>
+            <label>
+              <span>Name *</span>
+              <input
+                value={characterForm.name}
+                onChange={(event) => updateCharacterForm('name', event.target.value)}
+                placeholder="Example: Mara Thornwake"
+                required
+              />
+            </label>
+
+            <label>
+              <span>Species *</span>
+              <input
+                value={characterForm.species}
+                onChange={(event) => updateCharacterForm('species', event.target.value)}
+                placeholder="Example: Human"
+                required
+              />
+            </label>
+
+            <label>
+              <span>Class *</span>
+              <input
+                value={characterForm.class}
+                onChange={(event) => updateCharacterForm('class', event.target.value)}
+                placeholder="Example: Bard"
+                required
+              />
+            </label>
+
+            <label>
+              <span>Alignment</span>
+              <input
+                value={characterForm.alignment}
+                onChange={(event) => updateCharacterForm('alignment', event.target.value)}
+                placeholder="Example: Chaotic Good"
+              />
+            </label>
+
+            <label>
+              <span>Background</span>
+              <input
+                value={characterForm.background}
+                onChange={(event) => updateCharacterForm('background', event.target.value)}
+                placeholder="Example: Guild artisan"
+              />
+            </label>
+
+            <label>
+              <span>Affiliation</span>
+              <input
+                value={characterForm.affiliation}
+                onChange={(event) => updateCharacterForm('affiliation', event.target.value)}
+                placeholder="Example: Lantern Company"
+              />
+            </label>
+
+            <label>
+              <span>Status</span>
+              <input
+                value={characterForm.status}
+                onChange={(event) => updateCharacterForm('status', event.target.value)}
+                placeholder="Example: Active"
+              />
+            </label>
+
+            <label>
+              <span>Image URL</span>
+              <input
+                type="url"
+                value={characterForm.image_url}
+                onChange={(event) => updateCharacterForm('image_url', event.target.value)}
+                placeholder="https://example.com/portrait.jpg"
+              />
+            </label>
+
+            <label className="full-width-field">
+              <span>Biography</span>
+              <textarea
+                value={characterForm.biography}
+                onChange={(event) => updateCharacterForm('biography', event.target.value)}
+                placeholder="Briefly describe the character's history."
+                rows="4"
+              />
+            </label>
+
+            <label className="full-width-field">
+              <span>Abilities</span>
+              <textarea
+                value={characterForm.abilities}
+                onChange={(event) => updateCharacterForm('abilities', event.target.value)}
+                placeholder="List specialties, abilities, or signature skills."
+                rows="3"
+              />
+            </label>
+
+            <label className="full-width-field">
+              <span>Notes</span>
+              <textarea
+                value={characterForm.notes}
+                onChange={(event) => updateCharacterForm('notes', event.target.value)}
+                placeholder="Any extra notes for this codex entry."
+                rows="3"
+              />
+            </label>
+
+            <div className="form-actions full-width-field">
+              <button className="button primary-button" type="submit" disabled={isSaving}>
+                {isSaving ? 'Saving...' : 'Save Character'}
+              </button>
+            </div>
+
+            {formError && (
+              <div className="form-message error-message full-width-field" role="alert">
+                {formError}
+              </div>
+            )}
+
+            {formSuccess && (
+              <div className="form-message success-message full-width-field" role="status">
+                {formSuccess}
+              </div>
+            )}
+          </form>
         </section>
       </main>
     </div>
