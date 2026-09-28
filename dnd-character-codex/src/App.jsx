@@ -1,121 +1,123 @@
-import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
 import './App.css'
 
+const featuredCharacters = [
+  {
+    name: 'Aelira Moonbrook',
+    species: 'Half-Elf',
+    className: 'Ranger',
+    summary:
+      'A borderland scout who maps forgotten roads and keeps watch over ruined watchtowers.',
+  },
+  {
+    name: 'Bram Ironvale',
+    species: 'Dwarf',
+    className: 'Cleric',
+    summary:
+      'A traveling shrine-keeper carrying records of lost clans and battlefield oaths.',
+  },
+  {
+    name: 'Nyx Emberquill',
+    species: 'Tiefling',
+    className: 'Wizard',
+    summary:
+      'An archive mage who studies cursed manuscripts and catalogues magical anomalies.',
+  },
+]
+
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    <div className="app-shell">
+      <header className="site-header">
+        <a className="brand" href="#home" aria-label="D&D Character Codex home">
+          <span className="brand-mark">D20</span>
+          <span>D&amp;D Character Codex</span>
+        </a>
 
-      <div className="ticks"></div>
+        <nav className="main-nav" aria-label="Main navigation">
+          <a href="#home">Home</a>
+          <a href="#characters">Characters</a>
+          <a href="#add-character">Add Character</a>
+        </nav>
+      </header>
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
+      <main>
+        <section className="hero-section" id="home">
+          <div className="hero-copy">
+            <p className="eyebrow">Adventurer's Archive</p>
+            <h1>D&amp;D Character Codex</h1>
+            <p className="hero-text">
+              A fantasy character encyclopedia for browsing heroes, rivals,
+              allies, and mysterious figures from original campaigns.
+            </p>
+            <div className="hero-actions" aria-label="Primary actions">
+              <a className="button primary-button" href="#characters">
+                Browse Characters
               </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
+              <a className="button secondary-button" href="#add-character">
+                Add New Entry
               </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+            </div>
+          </div>
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
+          <aside className="archive-note" aria-label="Project specification">
+            <h2>Project Spec</h2>
+            <p>
+              D&amp;D Character Codex stores character records in a cloud database
+              and will allow users to create, read, update, and delete entries.
+            </p>
+            <dl>
+              <div>
+                <dt>Main Data</dt>
+                <dd>Character</dd>
+              </div>
+              <div>
+                <dt>Current Stage</dt>
+                <dd>Layout and navigation</dd>
+              </div>
+            </dl>
+          </aside>
+        </section>
+
+        <section className="content-section" id="characters">
+          <div className="section-heading">
+            <p className="eyebrow">Featured Records</p>
+            <h2>Characters in the Codex</h2>
+            <p>
+              These are placeholder entries for now. In the next stages, this
+              section will read real records from Supabase.
+            </p>
+          </div>
+
+          <div className="character-grid">
+            {featuredCharacters.map((character) => (
+              <article className="character-card" key={character.name}>
+                <div className="portrait-placeholder" aria-hidden="true">
+                  {character.name.charAt(0)}
+                </div>
+                <div>
+                  <p className="card-kicker">
+                    {character.species} {character.className}
+                  </p>
+                  <h3>{character.name}</h3>
+                  <p>{character.summary}</p>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section className="content-section form-preview" id="add-character">
+          <div className="section-heading">
+            <p className="eyebrow">Coming Next</p>
+            <h2>Add Character</h2>
+            <p>
+              This area will become the character creation form once the
+              database connection is ready.
+            </p>
+          </div>
+        </section>
+      </main>
+    </div>
   )
 }
 
