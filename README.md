@@ -122,7 +122,7 @@ Add these environment variables in Netlify:
 ## Links
 
 - GitHub repository: https://github.com/futureof723/D-D-Character-Codex
-- Deployed application: To be added after Netlify deployment
+- Deployed application: https://ddcharactercodex.netlify.app/#characters
 - Demo video: To be added after recording
 
 ## Screenshots
